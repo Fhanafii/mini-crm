@@ -1,4 +1,31 @@
 {
-  "customers": [],
-  "orders": []
+  "customers": [
+    {
+      "id": "mqbxyo2idsvra4vaht",
+      "name": "Budi Santoso",
+      "email": "budi@example.com",
+      "phone": "081234567890",
+      "createdAt": "2026-06-13T05:55:23.610Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "mqbxzshmu8u66xtnlqm",
+      "customerId": "mqbxyo2idsvra4vaht",
+      "items": [
+        {
+          "price": 15000,
+          "quantity": 2,
+          "name": "Nasi Goreng"
+        },
+        {
+          "price": 5000,
+          "quantity": 2,
+          "name": "Teh Botol"
+        }
+      ],
+      "totalPrice": 40000,
+      "createdAt": "2026-06-13T05:56:15.995Z"
+    }
+  ]
 }
