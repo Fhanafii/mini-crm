@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useCRM } from '../context/CRMContext';
 import { customerAPI } from '../services/api';
+import { AddCustomerForm } from './AddCustomerForm';
 
 export function CustomerList() {
   const { customers, setCustomers } = useCRM();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -48,60 +50,64 @@ export function CustomerList() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Customers</h2>
-        <button
-          onClick={fetchCustomers}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          Refresh
-        </button>
-      </div>
+    <>
+      <div>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-xl font-semibold text-slate-800">
+            Total: {customers.length} customers
+          </h2>
 
-      {customers.length === 0 ? (
-        <p className="text-center text-gray-500 py-8">
-          No customers yet. Add one to get started!
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-100 border-b-2 border-gray-300">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">
-                  Name
-                </th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">
-                  Email
-                </th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">
-                  Phone
-                </th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">
-                  Joined
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {customers.map((customer) => (
-                <tr
-                  key={customer.id}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition"
-                >
-                  <td className="px-4 py-3 text-gray-800 font-medium">
-                    {customer.name}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{customer.email}</td>
-                  <td className="px-4 py-3 text-gray-600">{customer.phone}</td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {new Date(customer.createdAt).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-[#514EF3] text-white px-6 py-3 rounded-full"
+          >
+            Add New Customer
+          </button>
         </div>
-      )}
-    </div>
+
+        {customers.length === 0 ? (
+          <div className="bg-white rounded-xl p-10 text-center">
+            No customers found
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl overflow-hidden border">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b text-slate-500">
+                  <th className="text-left px-8 py-5">Name</th>
+                  <th className="text-left px-8 py-5">Email</th>
+                  <th className="text-left px-8 py-5">Phone</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {customers.map((customer) => (
+                  <tr
+                    key={customer.id}
+                    className="border-b hover:bg-gray-50"
+                  >
+                    <td className="px-8 py-6">
+                      {customer.name}
+                    </td>
+
+                    <td className="px-8 py-6">
+                      {customer.email}
+                    </td>
+
+                    <td className="px-8 py-6">
+                      {customer.phone}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      <AddCustomerForm
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
+    </>
   );
 }

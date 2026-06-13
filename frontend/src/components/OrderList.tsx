@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useCRM } from '../context/CRMContext';
 import { orderAPI } from '../services/api';
+import { AddOrderForm } from './AddOrderForm';
 
 export function OrderList() {
   const { customers, orders, setOrders, getCustomerById } = useCRM();
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [showAddModal, setShowAddModal] = useState(false);
+  
   useEffect(() => {
-    fetchAllOrders();
-  }, []);
+    if (customers.length > 0) {
+      fetchAllOrders();
+    }
+  }, [customers]);
 
   const fetchAllOrders = async () => {
     try {
@@ -66,13 +70,33 @@ export function OrderList() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Orders</h2>
-        <button
-          onClick={fetchAllOrders}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        <h2 className="text-[24px] font-semibold text-[#092C4C]">
+          Orders
+        </h2>
+
+        <div className="flex gap-3">
+          <button
+            onClick={fetchAllOrders}
+            className="px-4 py-2 border border-[#D8E0E7] rounded-lg"
+          >
+            Refresh
+          </button>
+
+          <button
+          onClick={() => setShowAddModal(true)}
+          className="
+            w-[200px]
+            h-[50px]
+            bg-[#514EF3]
+            text-white
+            rounded-[70px]
+            font-medium
+            text-[14px]
+          "
         >
-          Refresh
+          + Add Order
         </button>
+        </div>
       </div>
 
       <div className="mb-6">
@@ -147,6 +171,35 @@ export function OrderList() {
           })}
         </div>
       )}
+
+      {showAddModal && (
+      <div
+        className="
+          fixed
+          inset-0
+          bg-black/30
+          backdrop-blur-sm
+          flex
+          items-center
+          justify-center
+          z-[9999]
+        "
+      >
+        <div
+          className="
+            bg-white
+            rounded-[24px]
+            w-[620px]
+            h-[700px]
+            overflow-y-auto
+          "
+        >
+          <AddOrderForm
+            onClose={() => setShowAddModal(false)}
+          />
+        </div>
+      </div>
+    )}
     </div>
   );
 }

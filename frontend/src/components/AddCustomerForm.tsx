@@ -1,130 +1,167 @@
 import { useState } from 'react';
-import { useCRM } from '../context/CRMContext';
 import { customerAPI } from '../services/api';
+import { useCRM } from '../context/CRMContext';
 
-export function AddCustomerForm() {
+interface AddCustomerFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function AddCustomerForm({
+  isOpen,
+  onClose,
+}: AddCustomerFormProps) {
   const { addCustomer } = useCRM();
+
+  const [loading, setLoading] = useState(false);
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     phone: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+
+  if (!isOpen) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const resetForm = () => {
+    setFirstName('');
+    setLastName('');
+
+    setFormData({
+      email: '',
+      phone: '',
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
-
-    // Validation
-    if (!formData.name.trim()) {
-      setError('Name is required');
-      return;
-    }
-    if (!formData.email.trim() || !formData.email.includes('@')) {
-      setError('Valid email is required');
-      return;
-    }
-    if (!formData.phone.trim()) {
-      setError('Phone is required');
-      return;
-    }
 
     try {
       setLoading(true);
-      const newCustomer = await customerAPI.addCustomer(formData);
+
+      const newCustomer = await customerAPI.addCustomer({
+        name: `${firstName} ${lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+      });
+
       addCustomer(newCustomer);
-      setFormData({ name: '', email: '', phone: '' });
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      setError('Failed to add customer. Please try again.');
-      console.error(err);
+
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error('Error adding customer:', error);
+      alert('Failed to add customer');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Customer</h2>
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="w-full max-w-[650px] bg-white rounded-3xl p-8 shadow-xl">
+        <div className="flex items-center justify-between mb-10">
+          <h2 className="text-xl font-semibold text-[#17375E]">
+            Add New Customer
+          </h2>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-          Customer added successfully!
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter customer name"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            disabled={loading}
-          />
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full bg-[#90A0B7] text-white flex items-center justify-center"
+          >
+            ×
+          </button>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter email address"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            disabled={loading}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-2 font-medium text-[#17375E]">
+                First Name
+              </label>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Phone
-          </label>
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="Enter phone number"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            disabled={loading}
-          />
-        </div>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                className="w-full h-12 rounded-xl border border-[#E5EAF0] bg-[#F4F7FA] px-4 outline-none"
+              />
+            </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Adding...' : 'Add Customer'}
-        </button>
-      </form>
+            <div>
+              <label className="block mb-2 font-medium text-[#17375E]">
+                Last Name
+              </label>
+
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                className="w-full h-12 rounded-xl border border-[#E5EAF0] bg-[#F4F7FA] px-4 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 font-medium text-[#17375E]">
+                Email
+              </label>
+
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full h-12 rounded-xl border border-[#E5EAF0] bg-[#F4F7FA] px-4 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 font-medium text-[#17375E]">
+                Phone
+              </label>
+
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                className="w-full h-12 rounded-xl border border-[#E5EAF0] bg-[#F4F7FA] px-4 outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end items-center gap-6 mt-10">
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-[#17375E] font-medium"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-8 py-3 rounded-full bg-[#514EF3] text-white font-medium"
+            >
+              {loading ? 'Saving...' : 'Save Customer'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

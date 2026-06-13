@@ -8,7 +8,13 @@ interface OrderItemInput {
   price: number;
 }
 
-export function AddOrderForm() {
+interface AddOrderFormProps {
+  onClose: () => void;
+}
+
+export function AddOrderForm({
+  onClose,
+}: AddOrderFormProps) {
   const { customers, addOrder } = useCRM();
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [items, setItems] = useState<OrderItemInput[]>([]);
@@ -72,7 +78,10 @@ export function AddOrderForm() {
       setSelectedCustomerId('');
       setItems([]);
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (err) {
       setError('Failed to add order. Please try again.');
       console.error(err);
@@ -82,8 +91,33 @@ export function AddOrderForm() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Order</h2>
+    <div className="bg-white p-8 h-full">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-[24px] font-semibold text-[#092C4C]">
+            Add Order
+          </h2>
+
+          <p className="text-[#6E7C87] text-sm mt-1">
+            Create a new customer order
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="
+            w-10
+            h-10
+            rounded-full
+            bg-[#F5F7FA]
+            text-[#092C4C]
+            text-xl
+          "
+        >
+          ×
+        </button>
+      </div>
 
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
