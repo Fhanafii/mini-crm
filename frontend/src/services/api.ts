@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Customer, Order } from '../context/CRMContext';
+import type { Customer, Order } from '../context/CRMContext';
 
 const API_BASE_URL = 'http://localhost:3000';
 
